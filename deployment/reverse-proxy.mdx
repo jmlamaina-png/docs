@@ -1,0 +1,76 @@
+---
+title: "Set Up Nginx Reverse Proxy for LaMaina.ai"
+sidebarTitle: "Reverse Proxy"
+description: "Configure Nginx as a reverse proxy in front of LaMaina.ai to handle HTTPS termination and serve the app on port 80/443 in production."
+---
+
+Run Nginx in front of LaMaina.ai to handle TLS termination and expose the app on standard ports 80 and 443. Nginx forwards incoming requests to the Node.js server on port 3000, upgrades WebSocket connections, and — once you add a certificate — handles all HTTPS traffic so the application itself does not need to manage TLS.
+
+## Basic Nginx Configuration
+
+Create a new site configuration file at `/etc/nginx/sites-available/lamaina`:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+Enable the site and reload Nginx:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/lamaina /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo nginx -s reload
+```
+
+## Enable HTTPS with Let's Encrypt
+
+<Steps>
+  <Step title="Install Certbot">
+    Install Certbot and the Nginx plugin on your server:
+
+    ```bash
+    sudo apt install certbot python3-certbot-nginx
+    ```
+  </Step>
+
+  <Step title="Obtain a certificate">
+    Run Certbot against your domain. Replace `yourdomain.com` with your actual domain name:
+
+    ```bash
+    sudo certbot --nginx -d yourdomain.com
+    ```
+
+    Certbot will verify domain ownership, obtain a certificate from Let's Encrypt, and automatically update your Nginx configuration to add the `listen 443 ssl` block and redirect HTTP to HTTPS.
+  </Step>
+
+  <Step title="Verify and reload Nginx">
+    After Certbot finishes, check the updated configuration and reload Nginx to apply it:
+
+    ```bash
+    sudo nginx -t
+    sudo nginx -s reload
+    ```
+
+    Certbot also installs a systemd timer (or cron job) that automatically renews the certificate before it expires. Verify renewal is configured:
+
+    ```bash
+    sudo certbot renew --dry-run
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+  Set `NODE_ENV=production` in your `.env` and always serve LaMaina.ai over HTTPS in production. Running over plain HTTP can cause cookie domain mismatch issues that prevent users from staying logged in, because the session cookie is set with `Secure` and `SameSite` attributes that require an HTTPS origin.
+</Tip>

@@ -1,0 +1,204 @@
+---
+title: "Troubleshoot Common LaMaina.ai Issues"
+sidebarTitle: "Troubleshooting"
+description: "Fix common issues with LaMaina.ai including startup errors, authentication problems, LLM connection failures, S3 storage errors, and content generation issues."
+---
+
+This page covers the most common issues you might encounter with LaMaina.ai and how to fix them. Issues are grouped by category — find the section that matches your problem and follow the steps to resolve it.
+
+## Startup & Configuration
+
+<AccordionGroup>
+  <Accordion title='Error: "JWT_SECRET is not set"'>
+    Your `.env` file is missing the `JWT_SECRET` variable, which is required to sign authentication cookies.
+
+    Add the following line to your `.env` file:
+
+    ```env
+    JWT_SECRET=<long-random-string>
+    ```
+
+    To generate a secure value, run:
+
+    ```bash
+    openssl rand -hex 32
+    ```
+
+    Paste the output as the value of `JWT_SECRET`, then restart the server.
+  </Accordion>
+
+  <Accordion title='Error: "Database not available"'>
+    LaMaina.ai cannot connect to your MySQL database. Check the following:
+
+    1. **Verify your connection string** — open `.env` and confirm `DATABASE_URL` is correctly formatted:
+       ```env
+       DATABASE_URL="mysql://user:password@host:3306/dbname"
+       ```
+    2. **Check that MySQL is running** — connect directly with a MySQL client to confirm the server is reachable from the machine running LaMaina.ai.
+    3. **Confirm the database exists** — the target database must exist before migrations can run. Create it if needed:
+       ```sql
+       CREATE DATABASE lamaina;
+       ```
+    4. Re-run migrations after fixing the connection:
+       ```bash
+       npx prisma migrate deploy
+       ```
+  </Accordion>
+
+  <Accordion title='Error: "OPENAI_API_KEY is not configured"'>
+    LaMaina.ai requires an API key to communicate with your LLM provider. Add your key to `.env`:
+
+    ```env
+    OPENAI_API_KEY=sk-...
+    ```
+
+    If you are using a provider other than OpenAI, set `OPENAI_API_BASE_URL` to your provider's base URL alongside the key:
+
+    ```env
+    OPENAI_API_BASE_URL=https://your-provider.example.com/v1
+    OPENAI_API_KEY=your-api-key
+    ```
+
+    Restart the server after saving changes.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Authentication
+
+<AccordionGroup>
+  <Accordion title="Blank page after login">
+    After logging in you are redirected to a blank page. This is almost always a session cookie problem.
+
+    LaMaina.ai sets an HTTP-only cookie to store your session. HTTP-only cookies are blocked by most browsers when the app is not served over HTTPS, or when `NODE_ENV` is not set to `production`.
+
+    To fix this:
+
+    1. Set `NODE_ENV=production` in your `.env` file.
+    2. Ensure the app is served over HTTPS — use a reverse proxy such as Nginx or Caddy with a valid TLS certificate.
+    3. Clear your browser cookies for the domain, then log in again.
+
+    <Warning>
+      Running LaMaina.ai over plain HTTP in a production environment will cause authentication to fail. Always use HTTPS for self-hosted deployments.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Can't register a new account">
+    If the registration form submits but returns an error, or the account is not created:
+
+    1. **Run database migrations** — the `users` table may not exist yet:
+       ```bash
+       npx prisma migrate deploy
+       ```
+    2. **Check server logs** — run the server in a terminal and look for error output (stdout) when you attempt to register. Database constraint errors and missing environment variables will appear there.
+    3. **Confirm your database user has write permissions** — the MySQL user in `DATABASE_URL` must have `INSERT` privileges on the LaMaina.ai database.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Content Generation
+
+<AccordionGroup>
+  <Accordion title="Questions are not generating">
+    If you start a quiz session but no questions appear:
+
+    - **Use more substantial material.** Paste at least 200 words of content. Very short or highly repetitive text does not contain enough distinct concepts for the AI to generate meaningful questions.
+    - **Check your LLM provider.** Some providers or local models do not support structured JSON output (`response_format: json_schema`), which is required for quiz generation. Switch to OpenAI or a fully compatible provider.
+    - **Review server logs** for any API errors returned by your LLM provider, such as rate limit or model availability errors.
+
+    <Tip>
+      Material between 500 and 5,000 words tends to produce the best quiz results. Well-structured content with clear headings and concepts gives the AI more to work with.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Error: material exceeds the 10,000 word limit">
+    Each study session supports up to **10,000 words**. If your material is longer, split it into multiple sessions by chapter or topic.
+
+    For example, if you are studying a textbook:
+    - Session 1 → Chapters 1–3
+    - Session 2 → Chapters 4–6
+    - Session 3 → Chapters 7–9
+
+    All sessions are saved and accessible from your History page (`/history`).
+  </Accordion>
+
+  <Accordion title="Image generation fails — slides or flow charts have no images">
+    AI-generated images require an LLM provider that supports the `/v1/images/generations` endpoint (DALL-E 3 compatible). If your provider does not support this endpoint:
+
+    - Slides and flow charts will still be generated but will render **without AI-generated images**.
+    - To enable image generation, set `LLM_DEFAULT_MODEL` in `.env` to a model that supports image generation (for example, `dall-e-3` with an OpenAI key), or switch to a provider that supports the DALL-E 3 API.
+
+    <Note>
+      Ollama does not support image generation. If you are using a local Ollama model, slides and charts will always render without images — this is expected behaviour.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Flow chart shows blank or an error">
+    Flow chart generation works best with material that has a clear hierarchical or sequential structure. To improve results:
+
+    - Use **bullet-pointed outlines**, numbered processes, or concept maps as your input.
+    - Avoid dense, unstructured prose for flow chart sessions — summarise the key steps or concepts first.
+    - Check server logs for API errors if the chart fails to render entirely.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Storage
+
+<AccordionGroup>
+  <Accordion title="S3 upload fails">
+    If AI-generated images fail to upload to your S3 bucket, check the following:
+
+    1. **IAM permissions** — the IAM user or role must have at minimum:
+       ```json
+       {
+         "Effect": "Allow",
+         "Action": ["s3:PutObject", "s3:GetObject"],
+         "Resource": "arn:aws:s3:::your-bucket-name/*"
+       }
+       ```
+    2. **Region mismatch** — confirm that `AWS_REGION` in your `.env` matches the region where your S3 bucket was created.
+    3. **Bucket name** — double-check `S3_BUCKET_NAME` is spelled correctly and the bucket exists.
+
+    Review the server logs for the specific AWS error code returned — this will point to the exact permission or configuration issue.
+  </Accordion>
+
+  <Accordion title="Generated images are not displaying">
+    If images were uploaded successfully but are not visible in the UI:
+
+    - **Check the bucket region** — ensure the S3 bucket is in the same region as configured in `AWS_REGION`. Requests to the wrong regional endpoint will fail silently.
+    - **Check presigned URL expiry** — LaMaina.ai serves images via presigned URLs. If a session is very old, the URLs may have expired. Re-generating the content will produce fresh URLs.
+    - **Bucket policy** — confirm no bucket policy or ACL is blocking `s3:GetObject` for the application.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Local Models (Ollama)
+
+<AccordionGroup>
+  <Accordion title="Quiz generation fails with Ollama">
+    Quiz generation requires the LLM to return structured JSON output using `response_format: json_schema`. Most Ollama models do not support this feature.
+
+    **To use quizzes**, switch to OpenAI or another provider that fully supports structured outputs. All other features (summaries, slides, flow charts, anatomy maps) will continue to work with Ollama.
+
+    <Note>
+      Support for structured JSON output varies by Ollama model version. Check the model's documentation to see if `json_schema` response format is supported before troubleshooting further.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Image generation is not working with Ollama">
+    Ollama does not support image generation. This is a known limitation — slides and charts will render correctly but **without AI-generated images**.
+
+    If you need image generation, configure an OpenAI API key alongside your Ollama setup, or switch your `LLM_DEFAULT_MODEL` to a DALL-E 3 compatible model for sessions where you need slides with images.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+<Note>
+  If you encounter an issue not listed here, check the server logs (stdout) for detailed error messages. Most API errors, database failures, and configuration problems will print a descriptive message to the console that points directly to the cause.
+</Note>

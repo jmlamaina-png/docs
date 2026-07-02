@@ -1,0 +1,77 @@
+---
+title: "Configure AWS S3 File Storage for LaMaina.ai"
+sidebarTitle: "File Storage"
+description: "Set up AWS S3 to store uploaded files and AI-generated images in your self-hosted LaMaina.ai instance. Includes IAM policy and bucket configuration."
+---
+
+LaMaina.ai uses AWS S3 to store uploaded files and AI-generated images. Files are never served directly from S3 — instead, LaMaina.ai generates short-lived presigned URLs so that only authenticated users can access them.
+
+## Creating an S3 Bucket
+
+<Steps>
+  <Step title="Create an S3 bucket">
+    Open the [AWS S3 console](https://s3.console.aws.amazon.com/) and create a new bucket in the AWS region closest to your users. Note the bucket name and region — you will need both for your `.env`.
+
+    Leave **Block all public access** enabled. LaMaina.ai serves files through presigned URLs, so the bucket does not need to be public.
+  </Step>
+
+  <Step title="Create an IAM user with programmatic access">
+    In the [AWS IAM console](https://console.aws.amazon.com/iam/), create a new user. Under **Access type**, select **Programmatic access** to generate an access key ID and secret access key.
+  </Step>
+
+  <Step title="Attach the required IAM policy">
+    Attach the following inline or managed policy to the IAM user. Replace `YOUR_BUCKET_NAME` with the name of the bucket you created.
+
+    ```json
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:PutObject",
+            "s3:GetObject"
+          ],
+          "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+        }
+      ]
+    }
+    ```
+
+    LaMaina.ai only needs `PutObject` to upload files and `GetObject` to generate presigned download URLs. Do not grant broader permissions such as `s3:DeleteObject` or `s3:ListBucket` unless your workflow requires them.
+  </Step>
+
+  <Step title="Copy credentials to your .env">
+    Add the four storage variables to your `.env` file:
+
+    ```bash
+    AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+    AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    AWS_REGION=us-east-1
+    S3_BUCKET=my-lamaina-bucket
+    ```
+  </Step>
+</Steps>
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | Access key ID for the IAM user |
+| `AWS_SECRET_ACCESS_KEY` | Secret access key for the IAM user |
+| `AWS_REGION` | AWS region where the bucket is located (e.g. `us-east-1`) |
+| `S3_BUCKET` | Name of the S3 bucket |
+
+## How File Serving Works
+
+LaMaina.ai never exposes your S3 bucket URL directly. When a user requests a file, the server:
+
+1. Receives the request at `/manus-storage/<key>`
+2. Generates a short-lived presigned S3 URL for that object
+3. Redirects the browser to the presigned URL
+
+The presigned URL is valid for a short period and is tied to the specific object key. Users cannot enumerate or guess other file paths, and access is scoped to each request.
+
+<Tip>
+  You can use any S3-compatible storage service in place of AWS S3. [Cloudflare R2](https://developers.cloudflare.com/r2/), [MinIO](https://min.io/), and [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces) all work with the same AWS SDK. Set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` to your provider's credentials. If your provider requires a custom endpoint URL, configure it via the provider's SDK endpoint setting — consult your provider's S3-compatibility documentation for the exact environment variable or SDK option to use.
+</Tip>

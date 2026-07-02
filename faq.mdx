@@ -1,0 +1,170 @@
+---
+title: "Frequently Asked Questions About LaMaina.ai"
+sidebarTitle: "FAQ"
+description: "Answers to the most common questions about LaMaina.ai features, limits, LLM compatibility, self-hosting, data privacy, and study best practices."
+---
+
+Quick answers to the most common questions about LaMaina.ai. If you run into a problem rather than a question, see the [Troubleshooting](/troubleshooting) page.
+
+## General
+
+<AccordionGroup>
+  <Accordion title="What is LaMaina.ai?">
+    LaMaina.ai is a self-hosted AI study platform that transforms pasted text into interactive study tools. Paste any text-based material and generate:
+
+    - **Summaries** — concise overviews of your content
+    - **Quizzes** — up to 50 AI-generated questions with personalised feedback
+    - **Presentations** — 5-slide decks with AI-generated images
+    - **Flow charts** — visual diagrams of processes and hierarchies
+    - **Anatomy maps** — structured visual breakdowns for biological subjects
+
+    Because LaMaina.ai is self-hosted, your data stays in your own infrastructure.
+  </Accordion>
+
+  <Accordion title="What kind of material works best?">
+    LaMaina.ai works with any text-based content. It performs particularly well with:
+
+    - Textbook chapters
+    - Lecture notes
+    - Articles and blog posts
+    - Research papers and abstracts
+    - Study guides and outlines
+
+    For best results, paste **500 to 5,000 words** of well-structured text. Material with clear headings, bullet points, or numbered lists gives the AI more structure to work with, especially for flow charts and quizzes.
+
+    <Tip>
+      Avoid pasting raw HTML, code listings, or heavily formatted documents. Strip the content down to plain text before pasting for the most reliable results.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Is there a word limit?">
+    Yes. Each study session supports up to **10,000 words**. If your material is longer, split it into multiple sessions by chapter or topic.
+
+    For example:
+    - Session 1 → Introduction & Chapter 1
+    - Session 2 → Chapters 2–3
+    - Session 3 → Chapters 4–5
+
+    All sessions are saved and accessible from your History page.
+  </Accordion>
+
+  <Accordion title="Are my study sessions saved?">
+    Yes. All sessions are stored in your database and accessible from the **History** page at `/history`. You can return to any previous session to review your quiz answers, re-read summaries, or re-take questions.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Quizzes
+
+<AccordionGroup>
+  <Accordion title="How many questions will be generated?">
+    LaMaina.ai generates up to **50 questions per session**. The AI aims for comprehensive coverage of your material, so the actual number of questions will vary depending on the length and density of the content you paste.
+  </Accordion>
+
+  <Accordion title="Can I retake a quiz?">
+    Yes. Navigate to any previous session from the **History** page and answer the questions again. Each attempt is recorded separately, so you can track your improvement over time.
+  </Accordion>
+
+  <Accordion title="Can I answer questions by voice?">
+    Yes. Click the microphone icon on the quiz screen to switch to speech-to-text input. Speak your answer clearly and it will be transcribed automatically.
+
+    Voice input uses your browser's built-in speech recognition API. For the best experience, use **Chrome** or **Edge** — they have the most reliable and accurate speech recognition support.
+
+    <Note>
+      Voice input requires microphone permissions in your browser. If the microphone icon is greyed out, check that you have granted the site permission to access your microphone.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Does the AI really evaluate my answer?">
+    Yes. Each answer you submit is sent to the LLM along with the original study material for context. The AI compares your response to the correct answer and provides **specific, personalised feedback** — not just a right/wrong result. This means you get an explanation of what you got right, what you missed, and how to think about the concept.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Features
+
+<AccordionGroup>
+  <Accordion title="How many slides does a presentation have?">
+    Each presentation contains **5 slides**. Every slide includes a title, bullet points summarising the key ideas, and an AI-generated image relevant to the content.
+
+    <Note>
+      AI-generated images require a DALL-E 3 compatible LLM provider. If your provider does not support image generation, slides will still be created but without images. See the [Troubleshooting](/troubleshooting) page for details.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Do flow charts require a specific format?">
+    No specific format is required, but the quality of the output depends on how structured your input is. Material with a natural hierarchy — outlines, numbered processes, or concept maps — produces the clearest and most useful flow charts.
+
+    Dense, unstructured prose will still work, but the AI may not capture every relationship. If the result looks unclear, try summarising the key steps or concepts in a bulleted list first, then paste that as your input.
+  </Accordion>
+
+  <Accordion title="Can I use Anatomy Maps for non-human biology?">
+    Yes. Anatomy Maps work for any biological subject, not just human anatomy. You can use them for:
+
+    - Animal anatomy (vertebrate and invertebrate)
+    - Plant biology and cell structure
+    - Microbiology and cellular processes
+    - Any subject with a structured, part-to-whole relationship
+
+    Paste descriptive text about the organism or system and the AI will generate a structured visual breakdown.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Self-Hosting
+
+<AccordionGroup>
+  <Accordion title="Can I use a different LLM provider?">
+    Yes. LaMaina.ai works with any **OpenAI-compatible API**. To use a different provider, set the following environment variables in your `.env` file:
+
+    ```env
+    OPENAI_API_BASE_URL=https://your-provider.example.com/v1
+    OPENAI_API_KEY=your-api-key
+    LLM_DEFAULT_MODEL=your-preferred-model
+    ```
+
+    Popular compatible providers include Groq, Together AI, Mistral, and Anthropic (via compatibility layers). Check your provider's documentation for the correct base URL.
+  </Accordion>
+
+  <Accordion title="Can I use a local AI model with Ollama?">
+    Yes, Ollama is supported for local inference. To use it, point `OPENAI_API_BASE_URL` at your Ollama server:
+
+    ```env
+    OPENAI_API_BASE_URL=http://localhost:11434/v1
+    OPENAI_API_KEY=ollama
+    LLM_DEFAULT_MODEL=llama3
+    ```
+
+    Keep in mind these limitations with local Ollama models:
+
+    - **Quiz generation** requires `response_format: json_schema` (structured JSON output). Most Ollama models do not support this — quiz features may not work reliably.
+    - **Image generation** is not supported. Slides and charts will render without AI-generated images.
+
+    Summaries, flow charts, and anatomy maps generally work well with capable local models.
+  </Accordion>
+
+  <Accordion title="What database does LaMaina.ai use?">
+    LaMaina.ai uses **MySQL 8.0+**. Any MySQL-compatible service works, including:
+
+    - Self-hosted MySQL 8.0
+    - [TiDB](https://tidbcloud.com/)
+    - [PlanetScale](https://planetscale.com/)
+    - Amazon RDS for MySQL
+    - Azure Database for MySQL
+
+    Set your connection string in `.env`:
+
+    ```env
+    DATABASE_URL="mysql://user:password@host:3306/dbname"
+    ```
+  </Accordion>
+
+  <Accordion title="Is my data private when self-hosting?">
+    Yes. When you self-host LaMaina.ai, all your study sessions, quiz results, and user accounts are stored in **your own database** on your own infrastructure. No study data is sent to LaMaina.ai servers.
+
+    The only data sent externally is the content you paste into a study session, which is sent to your **configured LLM provider** (for example, OpenAI) for AI processing. If data privacy is a priority, use a local Ollama model so that no content leaves your network.
+  </Accordion>
+</AccordionGroup>

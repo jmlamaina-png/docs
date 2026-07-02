@@ -1,0 +1,127 @@
+---
+title: "Environment Variables Reference for LaMaina.ai"
+sidebarTitle: "Environment Variables"
+description: "Complete reference for all environment variables used to configure your self-hosted LaMaina.ai instance, including database, LLM, storage, and server settings."
+---
+
+LaMaina.ai is configured entirely through environment variables. Copy `.env.example` to `.env` and fill in each value before starting the server.
+
+```bash
+cp .env.example .env
+```
+
+## Required Variables
+
+These variables must be set for LaMaina.ai to start correctly. The server will not function without them.
+
+<ParamField body="DATABASE_URL" type="string" required>
+  MySQL connection string pointing to your database.
+
+  ```
+  DATABASE_URL=mysql://user:pass@host:3306/dbname
+  ```
+
+  See [Database Setup](/deployment/database) for supported engines and migration instructions.
+</ParamField>
+
+<ParamField body="JWT_SECRET" type="string" required>
+  A long random string used to sign session cookies. Generate a secure value with:
+
+  ```bash
+  openssl rand -hex 32
+  ```
+
+  Keep this value secret. Changing it will invalidate all active sessions.
+</ParamField>
+
+<ParamField body="OPENAI_API_BASE_URL" type="string" required>
+  Base URL of the OpenAI-compatible API you want to use. Set this to the OpenAI endpoint, an Azure OpenAI resource, a local Ollama instance, or any compatible provider.
+
+  ```
+  OPENAI_API_BASE_URL=https://api.openai.com
+  ```
+
+  See [LLM Providers](/configuration/llm-providers) for full provider setup examples.
+</ParamField>
+
+<ParamField body="OPENAI_API_KEY" type="string" required>
+  API key for your LLM provider. For local Ollama deployments, set this to the literal string `ollama`.
+
+  ```
+  OPENAI_API_KEY=sk-...
+  ```
+</ParamField>
+
+<ParamField body="AWS_ACCESS_KEY_ID" type="string" required>
+  Access key ID for the IAM user that has `s3:PutObject` and `s3:GetObject` permissions on your S3 bucket.
+
+  ```
+  AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+  ```
+</ParamField>
+
+<ParamField body="AWS_SECRET_ACCESS_KEY" type="string" required>
+  Secret access key paired with `AWS_ACCESS_KEY_ID`.
+
+  ```
+  AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  ```
+</ParamField>
+
+<ParamField body="AWS_REGION" type="string" required>
+  AWS region where your S3 bucket is located.
+
+  ```
+  AWS_REGION=us-east-1
+  ```
+</ParamField>
+
+<ParamField body="S3_BUCKET" type="string" required>
+  Name of the S3 bucket used to store uploaded files and AI-generated images.
+
+  ```
+  S3_BUCKET=my-lamaina-bucket
+  ```
+
+  See [File Storage](/configuration/file-storage) for bucket creation and IAM policy setup.
+</ParamField>
+
+## Optional Variables
+
+These variables have sensible defaults and only need to be set if you want to override the default behaviour.
+
+<ParamField body="LLM_DEFAULT_MODEL" type="string" default="gpt-4o">
+  The model name passed to your LLM provider for all text generation requests. Use your Azure deployment name, an Ollama model tag, or any model supported by your provider.
+
+  ```
+  LLM_DEFAULT_MODEL=gpt-4o
+  ```
+</ParamField>
+
+<ParamField body="VITE_GOOGLE_MAPS_API_KEY" type="string">
+  Google Maps API key, required only if your course content includes the Map component. Leave unset if you do not use maps.
+
+  ```
+  VITE_GOOGLE_MAPS_API_KEY=AIzaSy...
+  ```
+</ParamField>
+
+<ParamField body="PORT" type="number" default="3000">
+  The port the LaMaina.ai server listens on.
+
+  ```
+  PORT=3000
+  ```
+</ParamField>
+
+<ParamField body="NODE_ENV" type="string" default="development">
+  Set to `production` for all production deployments. This enables optimised builds, secure cookie settings, and suppresses development-only logging.
+
+  ```
+  NODE_ENV=production
+  ```
+</ParamField>
+
+<Warning>
+  Never commit your `.env` file to version control. Add it to `.gitignore` before your first commit. Rotate `JWT_SECRET` regularly — remember that rotating it will invalidate all active user sessions, so plan accordingly.
+</Warning>

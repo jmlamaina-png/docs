@@ -1,0 +1,96 @@
+---
+title: "Self-Host LaMaina.ai on Your Own Infrastructure"
+sidebarTitle: "Self-Hosting"
+description: "Run LaMaina.ai on your own servers using Node.js, MySQL, and an OpenAI-compatible LLM. Step-by-step setup for development and production."
+---
+
+LaMaina.ai is fully self-hostable, giving you complete control over your data, your choice of language model provider, and your file storage configuration. You can run it on a single VPS, a bare-metal server, or any cloud environment that supports Node.js — no proprietary runtime or vendor lock-in required. This guide walks you through everything you need to get a self-hosted instance running from scratch.
+
+## Prerequisites
+
+Make sure the following tools and services are available before you begin.
+
+| Tool | Minimum version | Notes |
+|------|----------------|-------|
+| Node.js | 18 LTS | 20 LTS recommended |
+| pnpm | 8+ | `npm install -g pnpm` |
+| MySQL | 8.0+ | Or any MySQL-compatible database such as TiDB or PlanetScale |
+| AWS S3 bucket | — | Used for file and image storage |
+| OpenAI API key | — | Or any OpenAI-compatible endpoint (e.g. Azure OpenAI, local Ollama proxy) |
+
+## Installation
+
+<Steps>
+  <Step title="Extract the project archive">
+    Unzip the portable distribution and move into the project directory:
+
+    ```bash
+    unzip ai-tutor-portable.zip && cd ai-tutor-portable
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    Install all Node.js dependencies using pnpm:
+
+    ```bash
+    pnpm install
+    ```
+  </Step>
+  <Step title="Configure environment variables">
+    Copy the example environment file and open it in your editor:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Fill in every value in `.env` — this includes your database connection string, AWS S3 credentials, OpenAI API key (or compatible endpoint URL), and any other required settings. The file contains inline comments explaining each variable.
+  </Step>
+  <Step title="Run database migrations">
+    Generate the migration SQL from the schema and apply it to your database:
+
+    ```bash
+    pnpm drizzle-kit generate && pnpm drizzle-kit migrate
+    ```
+
+    This creates all required tables in the MySQL database specified in your `.env` file.
+  </Step>
+  <Step title="Build the frontend">
+    Compile the Vite frontend for production:
+
+    ```bash
+    pnpm build
+    ```
+  </Step>
+  <Step title="Start the server">
+    Start the production server:
+
+    ```bash
+    pnpm start
+    ```
+
+    The application runs on port **3000** by default. You can change this by setting the `PORT` variable in your `.env` file.
+  </Step>
+</Steps>
+
+## Development mode
+
+To run LaMaina.ai locally with hot module replacement, use the dev command instead:
+
+```bash
+pnpm dev
+```
+
+This starts both the **Vite dev server** (for the frontend) and the **Express API** simultaneously. Changes to frontend files are reflected in the browser instantly via HMR; changes to the API layer restart the server process automatically.
+
+## Authentication
+
+The self-hosted version uses **email and password** authentication. No third-party OAuth provider is required out of the box.
+
+1. Navigate to `/login` in your browser.
+2. Select **Register** to create the first account.
+3. The first registered user is automatically assigned the `user` role.
+
+You can create additional accounts by registering through the same `/login` page. Role management and any admin configuration are handled directly in the database or through the environment variables defined in your `.env` file.
+
+<Note>
+  Once your instance is up and running, see the **Configuration** guide for a full reference of every environment variable, and the **Deployment** guide for recommended production setups including reverse proxy configuration, process management with PM2, and HTTPS with Let's Encrypt.
+</Note>

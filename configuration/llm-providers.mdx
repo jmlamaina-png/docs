@@ -1,0 +1,76 @@
+---
+title: "Configure LLM Providers for LaMaina.ai"
+sidebarTitle: "LLM Providers"
+description: "Connect LaMaina.ai to OpenAI, Azure OpenAI, Anthropic-compatible APIs, or local models via Ollama using the OpenAI-compatible interface."
+---
+
+LaMaina.ai calls any OpenAI-compatible API for text generation and image generation. Set `OPENAI_API_BASE_URL` and `OPENAI_API_KEY` in your `.env` to point the platform at your chosen provider — no code changes required.
+
+## Supported Providers
+
+<Tabs>
+  <Tab title="OpenAI">
+    The default and recommended provider. Supports all LaMaina.ai features, including structured JSON output for quizzes and DALL-E 3 image generation for slides and flow charts.
+
+    ```bash
+    OPENAI_API_BASE_URL=https://api.openai.com
+    OPENAI_API_KEY=sk-...
+    LLM_DEFAULT_MODEL=gpt-4o
+    ```
+
+    You can swap `gpt-4o` for any other OpenAI model (e.g. `gpt-4o-mini`) by changing `LLM_DEFAULT_MODEL`.
+  </Tab>
+
+  <Tab title="Azure OpenAI">
+    Point `OPENAI_API_BASE_URL` at your Azure OpenAI resource endpoint and set `LLM_DEFAULT_MODEL` to the name of your deployment (not the underlying model name).
+
+    ```bash
+    OPENAI_API_BASE_URL=https://YOUR_RESOURCE.openai.azure.com
+    OPENAI_API_KEY=<your-azure-api-key>
+    LLM_DEFAULT_MODEL=your-deployment-name
+    ```
+
+    Replace `YOUR_RESOURCE` with your Azure OpenAI resource name and `your-deployment-name` with the deployment you created in Azure AI Studio.
+  </Tab>
+
+  <Tab title="Local (Ollama)">
+    Run models entirely on your own hardware with [Ollama](https://ollama.com). Set the API key to the literal string `ollama` and point the base URL at your local Ollama server.
+
+    ```bash
+    OPENAI_API_BASE_URL=http://localhost:11434
+    OPENAI_API_KEY=ollama
+    LLM_DEFAULT_MODEL=llama3.2
+    ```
+
+    Pull a model before starting the server:
+
+    ```bash
+    ollama pull llama3.2
+    ```
+
+    <Note>
+      Local models may not support structured JSON output (required for quiz generation) or image generation. See the note below for details.
+    </Note>
+  </Tab>
+</Tabs>
+
+## What LaMaina.ai Uses the LLM For
+
+LaMaina.ai sends requests to your configured LLM provider for the following features:
+
+- **Study material summarisation** — condenses uploaded documents into concise study notes
+- **Quiz question generation** — produces multiple-choice and short-answer questions from course content
+- **Answer evaluation** — grades free-text student responses against expected answers
+- **Slide deck generation** — creates structured presentation slides from study materials
+- **Flow chart generation** — builds visual concept maps and process diagrams
+- **Anatomy chart extraction** — identifies and labels anatomical regions from images
+
+## Image Generation
+
+Slide deck and flow chart generation call the `/v1/images/generations` endpoint using the DALL-E 3 compatible interface. If your provider does not support image generation, LaMaina.ai will still generate the text content for slides and flow charts — only the accompanying images will be skipped.
+
+To use OpenAI's DALL-E 3, ensure your API key has access to the `dall-e-3` model. No additional configuration is needed beyond the standard OpenAI setup above.
+
+<Note>
+  Ollama and other local models may not support structured JSON output, which LaMaina.ai requires for quiz generation and answer evaluation. They also do not support the `/v1/images/generations` endpoint, so slide and flow chart images will not be produced. For full feature support, **GPT-4o or GPT-4o-mini** is recommended.
+</Note>

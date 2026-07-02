@@ -1,0 +1,85 @@
+{
+  "projectType": "saas",
+  "projectName": "LaMaina.ai",
+  "projectDescription": "An AI-powered study platform that transforms any text material into interactive learning experiences through summaries, quizzes, slide presentations, flow charts, and anatomy maps.",
+  "theme": "almond",
+  "primaryColor": "#7C3AED",
+  "lightColor": "#A78BFA",
+  "darkColor": "#5B21B6",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "self-hosting"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/study-sessions",
+              "features/quizzes",
+              "features/presentations",
+              "features/flow-charts",
+              "features/anatomy-maps"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/environment-variables",
+              "configuration/llm-providers",
+              "configuration/file-storage"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "deployment/docker",
+              "deployment/reverse-proxy",
+              "deployment/database"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "AI-powered study material summarization",
+    "Intelligent quiz generation with real-time answer evaluation",
+    "AI slide deck generation with DALL-E images",
+    "Flow chart generation from hierarchical material",
+    "Anatomy map generation with labeled body systems",
+    "Session history and progress tracking",
+    "Voice answer input and text-to-speech feedback",
+    "OpenAI-compatible LLM support (including local Ollama models)",
+    "Email + password authentication with JWT sessions",
+    "AWS S3 file storage for uploads and generated images"
+  ],
+  "publicApiSurface": [
+    "POST /trpc/study.createSession — create a study session from pasted material",
+    "POST /trpc/study.generateQuestions — generate quiz questions for a session",
+    "POST /trpc/study.evaluateAnswer — evaluate a student answer with AI feedback",
+    "POST /trpc/study.generateSlides — generate a slide deck from study material",
+    "POST /trpc/study.generateFlowChart — generate a flow chart from hierarchical material",
+    "POST /trpc/study.generateAnatomyChart — generate an anatomy map from medical material",
+    "GET /trpc/study.getSessions — retrieve all study sessions for the current user",
+    "GET /trpc/study.getSession — retrieve a single study session by ID",
+    "GET /trpc/study.getQuestions — retrieve quiz questions for a session",
+    "GET /trpc/study.getAnswers — retrieve submitted answers for a session",
+    "POST /trpc/auth.logout — log out the current user",
+    "GET /trpc/auth.me — retrieve the current authenticated user"
+  ]
+}

@@ -1,0 +1,82 @@
+---
+title: "Database Setup and Migrations for LaMaina.ai"
+sidebarTitle: "Database"
+description: "Set up MySQL 8.0+ (or a compatible service) and run Drizzle ORM migrations to initialize your LaMaina.ai database schema."
+---
+
+LaMaina.ai requires a MySQL 8.0-compatible database. You can use a local MySQL server, a managed cloud service, or a serverless MySQL platform — any engine that speaks the MySQL 8.0 wire protocol will work.
+
+## Supported Databases
+
+- **MySQL 8.0+** — self-hosted on any Linux server or VM
+- **TiDB Cloud** — distributed, MySQL-compatible managed database
+- **PlanetScale** — serverless MySQL with branching and a generous free tier
+- **Amazon RDS for MySQL** — fully managed MySQL on AWS
+
+## Connection String Format
+
+Set `DATABASE_URL` in your `.env` using the standard MySQL connection URI format:
+
+```
+DATABASE_URL=mysql://user:password@host:3306/dbname
+```
+
+| Part | Description |
+|---|---|
+| `user` | Database username |
+| `password` | Database user password |
+| `host` | Hostname or IP address of the MySQL server |
+| `3306` | Port (use the default or your provider's custom port) |
+| `dbname` | Name of the database to connect to |
+
+## Running Migrations
+
+LaMaina.ai uses [Drizzle ORM](https://orm.drizzle.team/) to manage the database schema. Run migrations whenever you set up a new instance or upgrade to a new version of LaMaina.ai.
+
+<Steps>
+  <Step title="Set DATABASE_URL in your .env">
+    Make sure `DATABASE_URL` is set to your database connection string before proceeding:
+
+    ```bash
+    DATABASE_URL=mysql://user:password@host:3306/lamaina
+    ```
+  </Step>
+
+  <Step title="Generate migration SQL">
+    Run the Drizzle Kit generator to produce SQL migration files from the current schema:
+
+    ```bash
+    pnpm drizzle-kit generate
+    ```
+
+    This writes `.sql` files to the `drizzle/migrations/` directory. You do not need to run this step on an existing instance unless you have modified the schema yourself.
+  </Step>
+
+  <Step title="Apply migrations to the database">
+    Run the migrate command to apply all pending migrations:
+
+    ```bash
+    pnpm drizzle-kit migrate
+    ```
+
+    Drizzle tracks which migrations have already been applied, so this command is safe to re-run — it only executes migrations that have not been applied yet.
+  </Step>
+
+  <Step title="Alternative: apply SQL files directly">
+    If you prefer to manage migrations manually, apply the `.sql` files in `drizzle/migrations/` directly using your database client or a migration tool of your choice:
+
+    ```bash
+    mysql -u user -p lamaina < drizzle/migrations/0000_initial.sql
+    ```
+
+    Apply the files in ascending filename order to respect dependency ordering.
+  </Step>
+</Steps>
+
+<Warning>
+  Always back up your database before running migrations in production. While Drizzle migrations are designed to be applied incrementally and safely, a backup gives you a recovery path if something goes wrong.
+</Warning>
+
+<Tip>
+  **TiDB Cloud** and **PlanetScale** both offer generous free tiers and are fully MySQL-compatible, so you can use them with LaMaina.ai without any code changes. Neither requires you to manage server infrastructure, OS updates, or backups — making them a good choice for teams that want to focus on running the application rather than operating a database.
+</Tip>

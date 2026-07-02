@@ -1,0 +1,41 @@
+---
+title: "Create AI Flow Charts to Visualize Concept Relationships"
+sidebarTitle: "Flow Charts"
+description: "LaMaina.ai parses hierarchical study material and generates visual flow charts that map how concepts relate and connect to each other."
+---
+
+The Flow Charts feature takes text that describes a hierarchy, process, or system and turns it into a visual diagram. Instead of trying to hold a branching structure in your head while reading, you can see the entire map at once — nodes representing concepts, connected by lines that show how they relate. This is particularly useful for complex topics like biological classification, historical cause-and-effect chains, legal hierarchies, or any material where structure matters as much as content.
+
+## How to Generate a Flow Chart
+
+<Steps>
+  <Step title="Go to the Study page and scroll to Flow Charts">
+    Navigate to the `/study` page in your app and scroll down to the **Flow Chart** section. You can use this feature independently of an existing study session.
+  </Step>
+  <Step title="Enter a title">
+    Type a title that describes the concept you're mapping — for example, **"Biology Concepts"** or **"Software Development Lifecycle"**. The title anchors the top-level node of your chart.
+  </Step>
+  <Step title="Paste hierarchical material">
+    Paste text that describes a clear parent-child or sequential structure. Topics with subtopics, processes with steps, systems with components — all work well. The more explicit the hierarchy in your text, the more accurate and detailed the chart will be.
+  </Step>
+  <Step title="Click Generate Chart">
+    Click the **Generate Chart** button. The AI parses your material, identifies the hierarchical relationships, and generates a flow chart image.
+  </Step>
+  <Step title="View your flow chart">
+    Your completed flow chart is displayed at `/flowchart`. The diagram shows all the nodes and connections extracted from your material.
+  </Step>
+</Steps>
+
+## Material Format
+
+<Tip>
+  Flow charts produce the best results when your material has a clear **parent-child structure**. Bullet-pointed content with indentation is ideal — the AI reads the indentation levels as hierarchy levels. Numbered outlines, process descriptions with steps, and concept maps written as prose with explicit relationships (e.g. "X consists of A, B, and C") also work well.
+</Tip>
+
+## What You See
+
+The generated flow chart displays your material as a **visual node diagram**. Each concept or category becomes a node, and the lines between nodes show the relationships extracted from your text — whether that's a hierarchy (parent → child), a sequence (step 1 → step 2), or a dependency (cause → effect). Use the chart to trace paths through complex material and spot connections you might have missed while reading linearly.
+
+<Note>
+  Flow charts are rendered as AI-generated images using your configured image generation provider. The visual output depends on the provider's capabilities. If image generation is unavailable in your setup, the chart will not be displayed.
+</Note>

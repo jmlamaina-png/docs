@@ -1,0 +1,109 @@
+---
+title: "Deploy LaMaina.ai with Docker"
+sidebarTitle: "Docker"
+description: "Build and run LaMaina.ai as a Docker container for production deployments. Includes a multi-stage Dockerfile and environment variable passing."
+---
+
+Docker is the recommended way to deploy LaMaina.ai in production. The multi-stage build produces a lean image that contains only the compiled output and production dependencies, keeping image size small and build artefacts out of the final container.
+
+## Dockerfile
+
+Save the following `Dockerfile` at the root of your LaMaina.ai repository:
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN npm install -g pnpm && pnpm install && pnpm build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json .
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["node", "dist/server/_core/index.js"]
+```
+
+The first stage installs dependencies and compiles the application. The second stage copies only the built output, so development dependencies and source files are not included in the final image.
+
+## Build and Run
+
+**Build the image:**
+
+```bash
+docker build -t lamaina-ai .
+```
+
+**Run the container**, passing your `.env` file for configuration:
+
+```bash
+docker run -p 3000:3000 --env-file .env lamaina-ai
+```
+
+The server starts on port `3000` by default. Open `http://localhost:3000` to verify the deployment. To run the container in the background, add the `-d` flag:
+
+```bash
+docker run -d -p 3000:3000 --env-file .env lamaina-ai
+```
+
+## Docker Compose
+
+For local development or self-contained deployments, use Docker Compose to run LaMaina.ai and MySQL together. Create a `docker-compose.yml` at the project root:
+
+```yaml
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: lamaina
+      MYSQL_USER: lamaina
+      MYSQL_PASSWORD: lamainapassword
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: mysql://lamaina:lamainapassword@db:3306/lamaina
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+```
+
+Start both services with:
+
+```bash
+docker compose up -d
+```
+
+Run database migrations after the first start:
+
+```bash
+docker compose exec app pnpm drizzle-kit migrate
+```
+
+<Note>
+  The `docker-compose.yml` above sets `DATABASE_URL` directly under `environment`, which overrides any value in your `.env` file. This ensures the app always connects to the Compose-managed MySQL container using the correct internal hostname (`db`). For all other variables (S3, LLM, JWT), continue to use your `.env` file.
+
+  To add HTTPS, place Nginx in front of the running container. See the [Reverse Proxy](/deployment/reverse-proxy) guide for a complete Nginx configuration and Let's Encrypt setup.
+</Note>
