@@ -1,7 +1,7 @@
 ---
-title: "Environment Variables Reference for LaMaina.ai"
+title: "Environment Variables Reference for LaMaina.ai Setup"
 sidebarTitle: "Environment Variables"
-description: "Complete reference for all environment variables used to configure your self-hosted LaMaina.ai instance, including database, LLM, storage, and server settings."
+description: "Complete reference for all environment variables needed to configure your self-hosted LaMaina.ai instance: database, LLM, storage, and server."
 ---
 
 LaMaina.ai is configured entirely through environment variables. Copy `.env.example` to `.env` and fill in each value before starting the server.
@@ -17,7 +17,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="DATABASE_URL" type="string" required>
   MySQL connection string pointing to your database.
 
-  ```
+  ```bash
   DATABASE_URL=mysql://user:pass@host:3306/dbname
   ```
 
@@ -37,7 +37,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="OPENAI_API_BASE_URL" type="string" required>
   Base URL of the OpenAI-compatible API you want to use. Set this to the OpenAI endpoint, an Azure OpenAI resource, a local Ollama instance, or any compatible provider.
 
-  ```
+  ```bash
   OPENAI_API_BASE_URL=https://api.openai.com
   ```
 
@@ -47,7 +47,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="OPENAI_API_KEY" type="string" required>
   API key for your LLM provider. For local Ollama deployments, set this to the literal string `ollama`.
 
-  ```
+  ```bash
   OPENAI_API_KEY=sk-...
   ```
 </ParamField>
@@ -55,7 +55,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="AWS_ACCESS_KEY_ID" type="string" required>
   Access key ID for the IAM user that has `s3:PutObject` and `s3:GetObject` permissions on your S3 bucket.
 
-  ```
+  ```bash
   AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
   ```
 </ParamField>
@@ -63,7 +63,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="AWS_SECRET_ACCESS_KEY" type="string" required>
   Secret access key paired with `AWS_ACCESS_KEY_ID`.
 
-  ```
+  ```bash
   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
   ```
 </ParamField>
@@ -71,7 +71,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="AWS_REGION" type="string" required>
   AWS region where your S3 bucket is located.
 
-  ```
+  ```bash
   AWS_REGION=us-east-1
   ```
 </ParamField>
@@ -79,7 +79,7 @@ These variables must be set for LaMaina.ai to start correctly. The server will n
 <ParamField body="S3_BUCKET" type="string" required>
   Name of the S3 bucket used to store uploaded files and AI-generated images.
 
-  ```
+  ```bash
   S3_BUCKET=my-lamaina-bucket
   ```
 
@@ -93,7 +93,7 @@ These variables have sensible defaults and only need to be set if you want to ov
 <ParamField body="LLM_DEFAULT_MODEL" type="string" default="gpt-4o">
   The model name passed to your LLM provider for all text generation requests. Use your Azure deployment name, an Ollama model tag, or any model supported by your provider.
 
-  ```
+  ```bash
   LLM_DEFAULT_MODEL=gpt-4o
   ```
 </ParamField>
@@ -101,7 +101,7 @@ These variables have sensible defaults and only need to be set if you want to ov
 <ParamField body="VITE_GOOGLE_MAPS_API_KEY" type="string">
   Google Maps API key, required only if your course content includes the Map component. Leave unset if you do not use maps.
 
-  ```
+  ```bash
   VITE_GOOGLE_MAPS_API_KEY=AIzaSy...
   ```
 </ParamField>
@@ -109,7 +109,7 @@ These variables have sensible defaults and only need to be set if you want to ov
 <ParamField body="PORT" type="number" default="3000">
   The port the LaMaina.ai server listens on.
 
-  ```
+  ```bash
   PORT=3000
   ```
 </ParamField>
@@ -117,7 +117,7 @@ These variables have sensible defaults and only need to be set if you want to ov
 <ParamField body="NODE_ENV" type="string" default="development">
   Set to `production` for all production deployments. This enables optimised builds, secure cookie settings, and suppresses development-only logging.
 
-  ```
+  ```bash
   NODE_ENV=production
   ```
 </ParamField>

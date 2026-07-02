@@ -1,5 +1,5 @@
 ---
-title: "Deploy LaMaina.ai with Docker"
+title: "Containerize and Deploy LaMaina.ai Using Docker Images"
 sidebarTitle: "Docker"
 description: "Build and run LaMaina.ai as a Docker container for production deployments. Includes a multi-stage Dockerfile and environment variable passing."
 ---
@@ -99,6 +99,7 @@ docker compose up -d
 Run database migrations after the first start:
 
 ```bash
+docker compose exec app pnpm drizzle-kit generate
 docker compose exec app pnpm drizzle-kit migrate
 ```
 

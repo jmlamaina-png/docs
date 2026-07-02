@@ -10,7 +10,7 @@ The Flow Charts feature takes text that describes a hierarchy, process, or syste
 
 <Steps>
   <Step title="Go to the Study page and scroll to Flow Charts">
-    Navigate to the `/study` page in your app and scroll down to the **Flow Chart** section. You can use this feature independently of an existing study session.
+    Navigate to the `/study` page in your app and scroll down to the **Create Flow Chart** section. You can use this feature independently of an existing study session.
   </Step>
   <Step title="Enter a title">
     Type a title that describes the concept you're mapping — for example, **"Biology Concepts"** or **"Software Development Lifecycle"**. The title anchors the top-level node of your chart.
@@ -29,7 +29,19 @@ The Flow Charts feature takes text that describes a hierarchy, process, or syste
 ## Material Format
 
 <Tip>
-  Flow charts produce the best results when your material has a clear **parent-child structure**. Bullet-pointed content with indentation is ideal — the AI reads the indentation levels as hierarchy levels. Numbered outlines, process descriptions with steps, and concept maps written as prose with explicit relationships (e.g. "X consists of A, B, and C") also work well.
+  Flow charts produce the best results when your material uses the **tier-labeled hierarchy format**. Label each tier explicitly on its own line, for example:
+
+  ```text
+  Tier 1: Organs
+  Tier 2 A: Cardiovascular System
+  Tier 2 B: Nervous System
+  Tier 3 A: Heart
+  Tier 3 B: Brain
+  Tier 4 A: Capillaries, Veins
+  Tier 4 B: Neurons, Dendrites, Axons
+  ```
+
+  Each tier becomes a level in the visual tree diagram, with boxes and connecting lines drawn between parent and child nodes.
 </Tip>
 
 ## What You See

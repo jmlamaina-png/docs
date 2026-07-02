@@ -1,7 +1,7 @@
 ---
-title: "Database Setup and Migrations for LaMaina.ai"
+title: "Set Up the LaMaina.ai Database and Run Drizzle Migrations"
 sidebarTitle: "Database"
-description: "Set up MySQL 8.0+ (or a compatible service) and run Drizzle ORM migrations to initialize your LaMaina.ai database schema."
+description: "Set up MySQL 8.0+ (or a compatible managed service such as TiDB or PlanetScale) and run Drizzle ORM migrations to initialize your LaMaina.ai schema."
 ---
 
 LaMaina.ai requires a MySQL 8.0-compatible database. You can use a local MySQL server, a managed cloud service, or a serverless MySQL platform — any engine that speaks the MySQL 8.0 wire protocol will work.
@@ -17,7 +17,7 @@ LaMaina.ai requires a MySQL 8.0-compatible database. You can use a local MySQL s
 
 Set `DATABASE_URL` in your `.env` using the standard MySQL connection URI format:
 
-```
+```bash
 DATABASE_URL=mysql://user:password@host:3306/dbname
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "Configure AWS S3 File Storage for LaMaina.ai"
+title: "Set Up AWS S3 File Storage for LaMaina.ai Self-Hosting"
 sidebarTitle: "File Storage"
 description: "Set up AWS S3 to store uploaded files and AI-generated images in your self-hosted LaMaina.ai instance. Includes IAM policy and bucket configuration."
 ---
@@ -66,7 +66,7 @@ LaMaina.ai uses AWS S3 to store uploaded files and AI-generated images. Files ar
 
 LaMaina.ai never exposes your S3 bucket URL directly. When a user requests a file, the server:
 
-1. Receives the request at `/manus-storage/<key>`
+1. Receives the file request from the authenticated user
 2. Generates a short-lived presigned S3 URL for that object
 3. Redirects the browser to the presigned URL
 
